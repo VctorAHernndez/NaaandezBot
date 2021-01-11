@@ -37,7 +37,11 @@ Commands that start with `!piru` prefix make the bot reply with cat ASCII art ac
 The `!wave` command makes the bot expect the '👋' emoji from the user before 15 seconds are up. If done successfully, you would make the bot happy. If not, the bot would be angry at you.
 
 ### Rekt
-The `!rekt` command returns a spoiler-marked image of our lord and saviour, Gino.
+The `!rekt` command returns a spoiler-marked image of our lord and saviour, Gino. Plain old `!rekt` returns a random image out of the `img` folder, while specifying an extra parameter returns a specific image:
+* `!rekt normal`
+* `!rekt ballin`
+* `!rekt queen`
+* `!rekt woof`
 
 ### Google Calendar Events
 Commands that start with `!cal` prefix make the bot reply with the events from a particular Gmail account linked to the `credentials.json` file. Can be formatted as an ASCII calendar or as a simple list.

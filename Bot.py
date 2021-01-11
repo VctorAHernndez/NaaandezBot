@@ -1,3 +1,5 @@
+import glob
+import random
 import discord
 import calendar
 from os.path import join
@@ -80,14 +82,30 @@ class Bot(discord.Client):
 	async def _rekt(self, message):
 		"""Send REKT image"""
 
-		# TODO: CHOOSE PICTURE AT RANDOM
+		arg = message.content.split(REKT)[1].strip()
 
-		channel = message.channel
-		filename = join('img', 'rekt.jpeg')
+		# Supported actions
+		REKT_ACTIONS = ['woof', 'ballin', 'normal', 'queen']
+		REKT_LENNY = '( ͡° ͜ʖ ͡°)'
 
+		# Help section
+		if arg == 'help':
+			return await message.channel.send(f'Try `{REKT}` followed by any of the following:\n`{set(REKT_ACTIONS)}` {REKT_LENNY}')
+
+		# Parse valid arguments
+		if arg == '':
+			files = glob.glob('img/rekt*')
+			index = random.randint(0, len(files) - 1)
+			filename = files[index]
+		elif arg in REKT_ACTIONS:
+			filename = join('img', f'rekt-{arg}.jpg')
+		else:
+			return await message.channel.send(f'Oops! I don\'t know what `{REKT} {arg}` means... 😥\nTry `{REKT} help` {REKT_LENNY}')
+
+		# Open and send image
 		with open(filename, 'rb') as f:
-			picture = discord.File(f, spoiler=True)
-			await channel.send(file=picture)
+			picture = discord.File(f, spoiler=False)
+			await message.channel.send(file=picture)
 
 
 	async def _calendar(self, message):
