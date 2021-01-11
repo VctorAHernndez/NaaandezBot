@@ -14,6 +14,7 @@ pip install -r requirements.txt
 
 ## Usage
 Create a Discord Bot [following these instructions](https://discordpy.readthedocs.io/en/latest/discord.html#discord-intro), then place your bot's token on a new file called `.env` like follows:
+
 ```BOT_TOKEN=YOUR_TOKEN_HERE```
 
 Finally, run `python main.py` and you're all set up!
