@@ -15,6 +15,16 @@ class Bot(discord.Client):
 		super().__init__()
 		self.echo_back = echo_back
 
+		# Instantiate Calendar Handler
+		try:
+			USER_TOKEN_FILE = join('config', 'token.pickle')
+			APP_CREDENTIALS = join('config', 'credentials.json')
+			self.ch = CalendarHandler(APP_CREDENTIALS, USER_TOKEN_FILE)
+			self.ch.authenticate()
+		except:
+			self.ch = None
+			raise Exception('Calendar abilities are currently unavailable! 😥\nPlease contact botmaster.')
+
 
 	async def on_ready(self):
 		print('Logged in as {}!'.format(self.user))
@@ -94,7 +104,8 @@ class Bot(discord.Client):
 
 		# Parse valid arguments
 		if arg == '':
-			files = glob.glob('img/rekt*')
+			folder = join('img', 'rekt*')
+			files = glob.glob(folder)
 			index = random.randint(0, len(files) - 1)
 			filename = files[index]
 		elif arg in REKT_ACTIONS:
@@ -122,18 +133,16 @@ class Bot(discord.Client):
 		elif message.content == CAL:
 			return await message.channel.send(f'You seem confused, try `{CAL} help` 🗓')
 
-		# Instantiate Calendar Handler
-		USER_TOKEN_FILE = join('config', 'token.pickle')
-		APP_CREDENTIALS = join('config', 'credentials.json')
-		ch = CalendarHandler(APP_CREDENTIALS, USER_TOKEN_FILE)
-		ch.authenticate()
+		# Check if CH is ok
+		if self.ch is None:
+			return await message.channel.send('Calendar abilities are currently unavailable! 😥\nPlease contact botmaster.')
 
 		# Parse valid arguments
 		if arg == 'events':
-			string = ch.get_event_list()
+			string = self.ch.get_event_list()
 			return await message.channel.send(f'```{string}```')
 		elif arg == 'view':
-			calendar_string = ch.get_calendar()
+			calendar_string = self.ch.get_calendar()
 			return await message.channel.send(f'```{calendar_string}```')
 		else:
 			return await message.channel.send(f'Oops! I don\'t know what `{CAL} {arg}` means... 😥\nTry `{CAL} help` 🗓')
