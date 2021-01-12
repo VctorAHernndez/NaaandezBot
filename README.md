@@ -31,7 +31,9 @@ Commands that start with `!piru` prefix make the bot reply with cat ASCII art ac
 * `!piru sleep`
 * `!piru alert`
 * `!piru stare`
-* `!piru love`
+* `!piru judge`
+* `!piru curious`
+* `!piru angel`
 
 ### Wave
 The `!wave` command makes the bot expect the '👋' emoji from the user before 15 seconds are up. If done successfully, you would make the bot happy. If not, the bot would be angry at you.
