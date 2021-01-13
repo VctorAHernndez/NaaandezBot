@@ -50,5 +50,8 @@ Commands that start with `!cal` prefix make the bot reply with the events from a
 * `!cal events`
 * `!cal view`
 
+## Additional Behavior
+The bot listens for the occurrence of the word "lit" on a short message and reacts with custom emojis (if available, or '🔥' otherwise) and replies with '^'.
+
 ## Disclaimers
 Only has been tested on a MacBookPro running macOS Catalina Version 10.15.7. You may have to install SSL Certificates manually on the machine where the bot is being run ([see this issue](https://github.com/Rapptz/discord.py/issues/423), which I've solved with `sudo path/to/Install\ Certificates.command`).
