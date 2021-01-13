@@ -74,20 +74,24 @@ class Bot(Client):
 
 
 	async def _lit(self, message):
-		"""React with emojis and reply '^'"""
+		"""React with fire emoji and reply '^'"""
+
+		emoji_exists = False
 
 		# KORARU's server
 		moving_fire1 = utils.get(message.guild.emojis, name='fueguito')
 		if moving_fire1:
 			await message.add_reaction(moving_fire1)
-		else:
-			await message.add_reaction('🔥')
+			emoji_exists = True
 
 		# PilonSmash's server
 		moving_fire2 = utils.get(message.guild.emojis, name='lit')
-		if moving_fire2:
-			await message.add_reaction(moving_fire2)			
-		else:
+		if moving_fire2 and not emoji_exists:
+			await message.add_reaction(moving_fire2)
+			emoji_exists = True
+
+		# Default Case
+		if not emoji_exists:
 			await message.add_reaction('🔥')
 
 		await message.channel.send('^')
