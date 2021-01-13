@@ -21,24 +21,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
-# USEFUL INIT PARAMETERS:
-# status - busy, offline, online, etc.
-# activity - "playing pubg", "listening to spotify", etc.
-
-# USEFUL ATTRIBUTES:
-# users
-
-# USEFUL METHODS:
-# get_channel(id)
-# get_user(id)
-# get_all_channels() # returns all channels from all guilds
-# get_all_members()
-# wait_for(event) # 
-
-
-# USEFUL LISTENERS:
-# on_user_update
-# on_member_update/join/remove
-# on_typing

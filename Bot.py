@@ -1,29 +1,35 @@
 import glob
 import random
-import discord
-import calendar
-from os.path import join
 from asyncio import TimeoutError
 from const.cats import CATS
-from const.prefixes import PIRU, WAVE, REKT, CAL
+from const.keywords import LIT
+from const.prefixes import PIRU, REKT, CAL, WAVE
+from const.actions import CAL_ACTIONS, REKT_ACTIONS, PIRU_ACTIONS
+from const.signatures import PIRU_SIGNATURE, REKT_SIGNATURE, CAL_SIGNATURE
+from const.messages import CALENDAR_UNAVAILABLE
+from handlers.StringHandler import StringHandler
 from handlers.CalendarHandler import CalendarHandler
+from config.paths import USER_TOKEN_FILE, APP_CREDENTIALS, REKT_FOLDER, REKT_IMAGE
+from discord import Client, Activity, ActivityType, File, utils
 
 
-class Bot(discord.Client):
+class Bot(Client):
 
 	def __init__(self, echo_back=False):
-		super().__init__()
+
+		act = Activity(type=ActivityType.listening,
+					name='to !rekt, !piru, !cal, !wave & lit')
+		
+		super().__init__(activity=act)
 		self.echo_back = echo_back
 
 		# Instantiate Calendar Handler
 		try:
-			USER_TOKEN_FILE = join('config', 'token.pickle')
-			APP_CREDENTIALS = join('config', 'credentials.json')
 			self.ch = CalendarHandler(APP_CREDENTIALS, USER_TOKEN_FILE)
 			self.ch.authenticate()
 		except:
 			self.ch = None
-			raise Exception('Calendar abilities are currently unavailable! 😥\nPlease contact botmaster.')
+			raise Exception(CALENDAR_UNAVAILABLE)
 
 
 	async def on_ready(self):
@@ -47,6 +53,19 @@ class Bot(discord.Client):
 			await self._rekt(message)
 		elif message.content.startswith(CAL):
 			await self._calendar(message)
+		elif self.is_lit(message):
+			await self._lit(message)
+
+
+	def is_lit(self, message, thresh=5):
+		"""Detects if a given message contains 'lit'"""
+
+		# True if:
+		# 1. message length is less than thresh, and
+		# 2. message contains 'lit' separated by spaces
+		cap = len(message.content) < thresh
+		words = message.content.lower().split(' ')
+		return cap and (LIT in words)
 
 
 	async def _echo_back(self, message):
@@ -54,23 +73,21 @@ class Bot(discord.Client):
 		await message.channel.send('Message from `{.author}`: {.content}'.format(message))
 
 
-	async def _piru(self, message):
-		"""Reply with cat ASCII art"""
+	async def _lit(self, message):
+		"""React with emojis and reply '^'"""
 
-		arg = message.content.split(PIRU)[1].strip()
-		
-		# Help section
-		if arg == 'help':
-			return await message.channel.send(f'Try `{PIRU}` followed by any of the following:\n`{set(CATS.keys())}` 🐱')
-		elif message.content == PIRU:
-			return await message.channel.send(f'You seem confused, try `{PIRU} help` 🐱')
+		# KORARU's server
+		moving_fire1 = utils.get(message.guild.emojis, name='fueguito')
+		if moving_fire1:
+			await message.add_reaction(moving_fire1)
 
-		# Parse valid arguments
-		if arg in CATS:
-			return await message.channel.send(f'```{CATS[arg]}```')
-		else:
-			return await message.channel.send(f'Oops! I don\'t know what `{PIRU} {arg}` means... 😥\nTry `{PIRU} help` 🐱')
-		
+		# PilonSmash's server
+		moving_fire2 = utils.get(message.guild.emojis, name='lit')
+		if moving_fire2:
+			await message.add_reaction(moving_fire2)			
+
+		await message.channel.send('^')
+
 
 	async def _wave(self, message):
 		"""Blush on wave response or roll eyes if no wave"""
@@ -89,33 +106,50 @@ class Bot(discord.Client):
 			await channel.send('☺️') # change to a reply or a reaction?
 
 
+	async def _piru(self, message):
+		"""Reply with cat ASCII art"""
+
+		arg = message.content.split(PIRU)[1].strip()
+		sh = StringHandler(arg=PIRU, signature=PIRU_SIGNATURE,
+						actions=PIRU_ACTIONS, parameter=arg)
+		
+		# Help section
+		if arg == 'help':
+			return await message.channel.send(sh.help_text())
+		elif message.content == PIRU:
+			return await message.channel.send(sh.confused_text())
+
+		# Parse valid arguments
+		if arg in CATS:
+			return await message.channel.send(f'```{CATS[arg]}```')
+		else:
+			return await message.channel.send(sh.oops_text())
+
+
 	async def _rekt(self, message):
 		"""Send REKT image"""
 
 		arg = message.content.split(REKT)[1].strip()
-
-		# Supported actions
-		REKT_ACTIONS = ['woof', 'ballin', 'normal', 'queen']
-		REKT_LENNY = '( ͡° ͜ʖ ͡°)'
+		sh = StringHandler(arg=REKT, signature=REKT_SIGNATURE,
+						actions=REKT_ACTIONS, parameter=arg)
 
 		# Help section
 		if arg == 'help':
-			return await message.channel.send(f'Try `{REKT}` followed by any of the following:\n`{set(REKT_ACTIONS)}` {REKT_LENNY}')
+			return await message.channel.send(sh.help_text())
 
 		# Parse valid arguments
 		if arg == '':
-			folder = join('img', 'rekt*')
-			files = glob.glob(folder)
+			files = glob.glob(REKT_FOLDER)
 			index = random.randint(0, len(files) - 1)
 			filename = files[index]
 		elif arg in REKT_ACTIONS:
-			filename = join('img', f'rekt-{arg}.jpg')
+			filename = REKT_IMAGE.format(arg=arg)
 		else:
-			return await message.channel.send(f'Oops! I don\'t know what `{REKT} {arg}` means... 😥\nTry `{REKT} help` {REKT_LENNY}')
+			return await message.channel.send(sh.oops_text())
 
 		# Open and send image
 		with open(filename, 'rb') as f:
-			picture = discord.File(f, spoiler=False)
+			picture = File(f, spoiler=False)
 			await message.channel.send(file=picture)
 
 
@@ -123,19 +157,18 @@ class Bot(discord.Client):
 		"""Reply with calendar details"""
 
 		arg = message.content.split(CAL)[1].strip()
-
-		# Supported actions
-		CAL_ACTIONS = ['events, view']
+		sh = StringHandler(arg=CAL, signature=CAL_SIGNATURE,
+						actions=CAL_ACTIONS, parameter=arg)
 
 		# Help section
 		if arg == 'help':
-			return await message.channel.send(f'Try `{CAL}` followed by any of the following:\n`{set(CAL_ACTIONS)}` 🗓')
+			return await message.channel.send(sh.help_text())
 		elif message.content == CAL:
-			return await message.channel.send(f'You seem confused, try `{CAL} help` 🗓')
+			return await message.channel.send(sh.confused_text())
 
 		# Check if CH is ok
 		if self.ch is None:
-			return await message.channel.send('Calendar abilities are currently unavailable! 😥\nPlease contact botmaster.')
+			return await message.channel.send(CALENDAR_UNAVAILABLE)
 
 		# Parse valid arguments
 		if arg == 'events':
@@ -145,5 +178,5 @@ class Bot(discord.Client):
 			calendar_string = self.ch.get_calendar()
 			return await message.channel.send(f'```{calendar_string}```')
 		else:
-			return await message.channel.send(f'Oops! I don\'t know what `{CAL} {arg}` means... 😥\nTry `{CAL} help` 🗓')
+			return await message.channel.send(sh.oops_text())
 

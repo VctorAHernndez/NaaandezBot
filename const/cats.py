@@ -137,6 +137,7 @@ SPOOKY_CAT = \
 """
 
 
+
 CATS = {
 	'play': PLAYFUL_CAT,
 	'sleep': SLEEPY_CAT,
@@ -148,3 +149,4 @@ CATS = {
 	'angel': ANGEL_CAT,
 	# 'spooky': SPOOKY_CAT, # too big
 }
+

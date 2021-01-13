@@ -1,10 +1,10 @@
-import datetime
 import pickle
 import os.path
 import calendar
+import datetime
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 
 # REFERENCE:
 # https://developers.google.com/calendar/quickstart/python

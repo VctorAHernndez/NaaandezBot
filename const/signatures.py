@@ -1,0 +1,3 @@
+REKT_SIGNATURE = '( ͡° ͜ʖ ͡°)' # REKT LENNY
+CAL_SIGNATURE = '🗓'
+PIRU_SIGNATURE = '🐱'
