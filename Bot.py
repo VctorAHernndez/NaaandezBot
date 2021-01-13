@@ -18,8 +18,8 @@ class Bot(Client):
 	def __init__(self, echo_back=False):
 
 		act = Activity(type=ActivityType.listening,
-					name='to !rekt, !piru, !cal, !wave & lit')
-		
+					name='!rekt, !piru, !cal, !wave & lit')
+
 		super().__init__(activity=act)
 		self.echo_back = echo_back
 
