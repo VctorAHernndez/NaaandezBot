@@ -80,11 +80,15 @@ class Bot(Client):
 		moving_fire1 = utils.get(message.guild.emojis, name='fueguito')
 		if moving_fire1:
 			await message.add_reaction(moving_fire1)
+		else:
+			await message.add_reaction('🔥')
 
 		# PilonSmash's server
 		moving_fire2 = utils.get(message.guild.emojis, name='lit')
 		if moving_fire2:
 			await message.add_reaction(moving_fire2)			
+		else:
+			await message.add_reaction('🔥')
 
 		await message.channel.send('^')
 
