@@ -35,6 +35,9 @@ Commands that start with `!piru` prefix make the bot reply with cat ASCII art ac
 * `!piru curious`
 * `!piru angel`
 
+### UwU
+Commands that start with `!uwu` prefix will 'uwuify' the sentence that follows the prefix (i.e. Hello friend! -> Hewwowo fwiend (つ✧ω✧)つ).
+
 ### Wave
 The `!wave` command makes the bot expect the '👋' emoji from the user before 15 seconds are up. If done successfully, you would make the bot happy. If not, the bot would be angry at you.
 

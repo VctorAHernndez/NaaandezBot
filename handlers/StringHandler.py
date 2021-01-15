@@ -1,4 +1,4 @@
-from const.messages import HELP_TEXT, OOPS_TEXT, CONFUSED_TEXT
+from const.messages import HELP_TEXT, OOPS_TEXT, CONFUSED_TEXT, UWU_HELP_TEXT
 
 class StringHandler:
 
@@ -20,4 +20,8 @@ class StringHandler:
 
 	def confused_text(self):
 		return CONFUSED_TEXT.format(arg=self.arg,
+									signature=self.signature)
+
+	def uwu_help_text(self):
+		return UWU_HELP_TEXT.format(arg=self.arg,
 									signature=self.signature)

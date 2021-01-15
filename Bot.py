@@ -3,14 +3,15 @@ import random
 from asyncio import TimeoutError
 from const.cats import CATS
 from const.keywords import LIT
-from const.prefixes import PIRU, REKT, CAL, WAVE
+from const.prefixes import PIRU, REKT, CAL, UWU, WAVE
 from const.actions import CAL_ACTIONS, REKT_ACTIONS, PIRU_ACTIONS
-from const.signatures import PIRU_SIGNATURE, REKT_SIGNATURE, CAL_SIGNATURE
+from const.signatures import PIRU_SIGNATURE, REKT_SIGNATURE, CAL_SIGNATURE, UWU_SIGNATURE
 from const.messages import CALENDAR_UNAVAILABLE
 from handlers.StringHandler import StringHandler
 from handlers.CalendarHandler import CalendarHandler
 from config.paths import USER_TOKEN_FILE, APP_CREDENTIALS, REKT_FOLDER, REKT_IMAGE
 from discord import Client, Activity, ActivityType, File, utils
+from owoify import owoify
 
 
 class Bot(Client):
@@ -18,7 +19,7 @@ class Bot(Client):
 	def __init__(self, echo_back=False):
 
 		act = Activity(type=ActivityType.listening,
-					name='!rekt, !piru, !cal, !wave & lit')
+					name='!rekt, !piru, !cal, !wave, !uwu & lit')
 
 		super().__init__(activity=act)
 		self.echo_back = echo_back
@@ -53,6 +54,8 @@ class Bot(Client):
 			await self._rekt(message)
 		elif message.content.startswith(CAL):
 			await self._calendar(message)
+		elif message.content.startswith(UWU):
+			await self._uwu(message)
 		elif self.is_lit(message):
 			await self._lit(message)
 
@@ -112,6 +115,33 @@ class Bot(Client):
 			await channel.send('🙄👎') # change to a reply or a reaction?
 		else:
 			await channel.send('☺️') # change to a reply or a reaction?
+
+
+	async def _uwu(self, message):
+		"""UWUify the given message"""
+
+		arg = message.content.split(UWU)[1].strip()
+		sh = StringHandler(arg=UWU, signature=UWU_SIGNATURE)
+
+		# Help section
+		if arg == 'help':
+			return await message.channel.send(sh.uwu_help_text())
+		elif message.content == UWU:
+			return await message.channel.send(sh.confused_text())
+
+		def uwuify_sentence(sentence):
+			# Note: 
+			# * Exclamation point includes kaomojis
+			# * Levels: owo, uwu, uvu
+			core = owoify(sentence, 'uvu')
+			num = random.random()
+			tail = '!' if num > 0.5 else '!)'
+			tail = '\n' + owoify(tail, 'uvu')
+			return core + tail
+
+		# Send uwuified message
+		text = uwuify_sentence(arg)
+		await message.channel.send(text)
 
 
 	async def _piru(self, message):
