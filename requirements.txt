@@ -15,6 +15,7 @@ httplib2==0.18.1
 idna==2.10
 multidict==4.7.6
 oauthlib==3.1.0
+owoify-py==1.0.5
 protobuf==3.14.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
