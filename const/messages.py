@@ -2,4 +2,4 @@ CALENDAR_UNAVAILABLE = 'Calendar abilities are currently unavailable! 😥\nPlea
 HELP_TEXT = 'Try `{arg}` followed by any of the following:\n`{actions}` {signature}'
 CONFUSED_TEXT = 'You seem confused, try `{arg} help` {signature}'
 OOPS_TEXT = 'Oops! I don\'t know what `{arg} {parameter}` means... 😥\nTry `{arg} help` {signature}'
-UWU_HELP_TEXT = 'Try `{arg}` followed by any sort of sentence! {signature}'
+UWU_HELP_TEXT = 'Try `{arg}` followed by any sort of sentence!\n{signature}'
