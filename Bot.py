@@ -132,10 +132,11 @@ class Bot(Client):
 		def uwuify_sentence(sentence):
 			# Note: 
 			# * Exclamation point includes kaomojis
+			# * Parenthesis includes sparkles + kaomojis
 			# * Levels: owo, uwu, uvu
 			core = owoify(sentence, 'uvu')
 			num = random.random()
-			tail = '!' if num > 0.5 else '!)'
+			tail = '!' if num > 0.5 else ')'
 			tail = '\n' + owoify(tail, 'uvu')
 			return core + tail
 
