@@ -1,6 +1,8 @@
 # NaaandezBot
 Discord Bot that replies to some custom commands. Made to have fun with the Discord API.
 
+[Link to invite!](https://discord.com/api/oauth2/authorize?client_id=770855701483487295&permissions=518208&scope=bot)
+
 ## Requirements
 `python >=3.7`
 
@@ -58,3 +60,13 @@ The bot listens for the occurrence of the word "lit" on a short message and reac
 
 ## Disclaimers
 Only has been tested on a MacBookPro running macOS Catalina Version 10.15.7 or older. You may have to install SSL Certificates manually on the machine where the bot is being run ([see this issue](https://github.com/Rapptz/discord.py/issues/423), which I've solved with `sudo path/to/Install\ Certificates.command`).
+
+### Permissions Used
+* Send Messages
+* Manage Messages
+* Embed Links
+* Attach Files
+* Read Message History
+* Mention Everyone
+* Use External Emojis
+* Add Reactions
