@@ -56,6 +56,8 @@ class Bot(Client):
 			await self._calendar(message)
 		elif message.content.startswith(UWU):
 			await self._uwu(message)
+		elif "68" in message.content:
+			await self._69(message)
 		elif self.is_lit(message):
 			await self._lit(message)
 
@@ -69,6 +71,11 @@ class Bot(Client):
 		cap = len(message.content) < thresh
 		words = message.content.lower().split(' ')
 		return cap and (LIT in words)
+
+
+	async def _69(self, message):
+		"""Send message in channel where '68' was found"""
+		await message.channel.send('69 😎')
 
 
 	async def _echo_back(self, message):
