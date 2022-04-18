@@ -1,10 +1,17 @@
-import pickle
-import os.path
 import calendar
-import datetime
-from googleapiclient.discovery import build
+import pickle
+from datetime import datetime
+from os import path
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.discovery import Resource
 
 # REFERENCE:
 # https://developers.google.com/calendar/quickstart/python
@@ -12,30 +19,31 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # https://developers.google.com/calendar/concepts/events-calendars?hl=en
 
 class CalendarHandler:
-
 	SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
-	def __init__(self, app_credentials, user_token_file):
+	def __init__(self, app_credentials: str, user_token_file: str) -> None:
 		self.USER_TOKEN_FILE = user_token_file
 		self.APP_CREDENTIALS = app_credentials
-		self.service = None
+		self.service: Optional[Resource] = None
 		self.SCOPES = CalendarHandler.SCOPES
 
 
-	def authenticate(self):
-		creds = None
+	def authenticate(self) -> None:
+		creds: Optional[Credentials] = None
 
-		if os.path.exists(self.USER_TOKEN_FILE):
+		if path.exists(self.USER_TOKEN_FILE):
 			with open(self.USER_TOKEN_FILE, 'rb') as token:
 				creds = pickle.load(token)
 
-		if not creds or not creds.valid:
+		if creds is None or not creds.valid:
 
-			if creds and creds.expired and creds.refresh_token:
+			if creds is not None and creds.expired and creds.refresh_token:
 				creds.refresh(Request())
 			else:
 				flow = InstalledAppFlow.from_client_secrets_file(
-					self.APP_CREDENTIALS, self.SCOPES)
+					self.APP_CREDENTIALS,
+					self.SCOPES,
+				)
 				creds = flow.run_local_server(port=0)
 
 			with open(self.USER_TOKEN_FILE, 'wb') as token:
@@ -44,37 +52,43 @@ class CalendarHandler:
 		self.service = build('calendar', 'v3', credentials=creds)
 
 
-	def fetch_month_events(self):
+	def fetch_month_events(self) -> List[Dict[str, Dict[str, Any]]]:
 
 		if self.service is None:
 			raise Exception('You need to authenticate first!')
 
 		# Extract today's info
-		now = datetime.datetime.utcnow()
+		now = datetime.utcnow()
 		month = now.month
 		year = now.year
 		_, num_days_in_month = calendar.monthrange(year, month)
 
 		# Construct first and last days of the month
-		first_day_of_month = datetime.datetime(year,
-											month,
-											1).isoformat() + 'Z'
-		last_day_of_month =  datetime.datetime(year, 
-											month, 
-											num_days_in_month).isoformat() + 'Z'
+		first_day_of_month = datetime(year, month, 1).isoformat() + 'Z'
+		last_day_of_month = datetime(year, month, num_days_in_month).isoformat() + 'Z'
 
 		# Get (up to 250) events
-		events_result = self.service.events().list(calendarId='primary', 
-											timeMin=first_day_of_month,
-											timeMax=last_day_of_month,
-											singleEvents=True,
-											orderBy='startTime').execute()
+		events_result: Dict[str, Any] = (
+			self.service.events()
+			.list(
+				calendarId='primary', 
+				timeMin=first_day_of_month,
+				timeMax=last_day_of_month,
+				singleEvents=True,
+				orderBy='startTime',
+			)
+			.execute()
+		)
+
 		events = events_result.get('items', [])
 
 		return events
 
 
-	def list_events(self, events):
+	def list_events(
+		self,
+		events: List[Dict[str, Dict[str, Any]]],
+	) -> str:
 		"""
 		Returns list-formatted events.
 
@@ -85,30 +99,40 @@ class CalendarHandler:
 		string = 'EVENTS:\n'
 
 		# If no events, return early
-		if not events:
+		if len(events) == 0:
 			string += 'No upcoming events this month.'
 			return string
 
 		# List events one by one
 		for i, event in enumerate(events):
 			datestring = event['start'].get('dateTime', event['start'].get('date'))
-			event_date = datetime.datetime.fromisoformat(datestring)
+			event_date = datetime.fromisoformat(datestring)
+
 			if event['start'].get('dateTime', None):
 				formatted_date = event_date.strftime('%b %d [%-I:%M %p %Z]')
 			else:
 				formatted_date = event_date.strftime('%b %d [All-Day]')
+
 			string += f'{i+1}. {formatted_date} – {event["summary"]}\n'
 
 		return string
 
 
-	def get_event_list(self):
+	def get_event_list(self) -> str:
 		"""Returns list-formatted events."""
 		events = self.fetch_month_events()
 		return self.list_events(events)
 
-		
-	def get_calendar(self, spaces=4, lines=2, highlight='*', syntax='C++', enlist=True, firstweekday=6):
+
+	def get_calendar(
+		self,
+		spaces: int = 4,
+		lines: int = 2,
+		highlight: str = '*',
+		syntax: str = 'C++',
+		enlist: bool = True,
+		firstweekday: int = 6,
+	) -> str:
 		"""
 		Return as calendar string in Discord ASCII format.
 
@@ -124,7 +148,7 @@ class CalendarHandler:
 		events = self.fetch_month_events()
 
 		# Extract today's info
-		now = datetime.datetime.utcnow()
+		now = datetime.utcnow()
 		month = now.month
 		year = now.year
 
@@ -142,22 +166,24 @@ class CalendarHandler:
  		# Construct string (with highlight applied)
 		string = syntax + '\n'
 		string += title
-		# string += (lines - 1) * '\n'
 		string += header
+	
 		for week in month:
 			for date in week:
 				for event in events:
 					datestring = event['start'].get('dateTime', event['start'].get('date'))
-					event_date = datetime.datetime.fromisoformat(datestring).date()
+					event_date = datetime.fromisoformat(datestring).date()
+
 					if date == event_date:
 						detail = str(date.day) + highlight
 						string += '{:^{}s}'.format(detail, spaces + 1)
 						break
+
 				else:
 					# Triggered if no 'break' was executed
 					string += '{:^{}d}'.format(date.day, spaces + 1) 
-			string += lines * '\n'
 
+			string += lines * '\n'
 
 		# Append events list
 		if enlist:
@@ -165,4 +191,3 @@ class CalendarHandler:
 			string += self.list_events(events)
 
 		return string
-

@@ -1,25 +1,50 @@
 import glob
 import random
 from asyncio import TimeoutError
-from const.cats import CATS
-from const.keywords import LIT
-from const.prefixes import PIRU, REKT, CAL, UWU, WAVE
-from const.actions import CAL_ACTIONS, REKT_ACTIONS, PIRU_ACTIONS
-from const.signatures import PIRU_SIGNATURE, REKT_SIGNATURE, CAL_SIGNATURE, UWU_SIGNATURE
-from const.messages import CALENDAR_UNAVAILABLE
-from handlers.StringHandler import StringHandler
-from handlers.CalendarHandler import CalendarHandler
-from config.paths import USER_TOKEN_FILE, APP_CREDENTIALS, REKT_FOLDER, REKT_IMAGE
-from discord import Client, Activity, ActivityType, File, utils
+from typing import List
+from typing import Optional
+
+from discord import Activity
+from discord import ActivityType
+from discord import Client
+from discord import Emoji
+from discord import File
+from discord import Message
+from discord import utils
 from owoify import owoify
 
+from config.paths import APP_CREDENTIALS
+from config.paths import REKT_FOLDER
+from config.paths import REKT_IMAGE
+from config.paths import USER_TOKEN_FILE
+from const.actions import CAL_ACTIONS
+from const.actions import PIRU_ACTIONS
+from const.actions import REKT_ACTIONS
+from const.cats import CATS
+from const.keywords import LIT
+from const.messages import CALENDAR_UNAVAILABLE
+from const.prefixes import CAL
+from const.prefixes import PIRU
+from const.prefixes import REKT
+from const.prefixes import UWU
+from const.prefixes import WAVE
+from const.signatures import CAL_SIGNATURE
+from const.signatures import PIRU_SIGNATURE
+from const.signatures import REKT_SIGNATURE
+from const.signatures import UWU_SIGNATURE
+from handlers.CalendarHandler import CalendarHandler
+from handlers.StringHandler import StringHandler
 
 class Bot(Client):
+	"""
+	Class that represents the Discord Bot's behavior
+	"""
 
-	def __init__(self, echo_back=False):
-
-		act = Activity(type=ActivityType.listening,
-					name='!rekt, !piru, !cal, !wave, !uwu & lit')
+	def __init__(self, echo_back: bool = False) -> None:
+		act = Activity(
+			type=ActivityType.listening,
+			name='!rekt, !piru, !cal, !wave, !uwu & lit',
+		)
 
 		super().__init__(activity=act)
 		self.echo_back = echo_back
@@ -32,12 +57,10 @@ class Bot(Client):
 			self.ch = None
 			raise Exception(CALENDAR_UNAVAILABLE)
 
-
-	async def on_ready(self):
+	async def on_ready(self) -> None:
 		print('Logged in as {}!'.format(self.user))
 
-
-	async def on_message(self, message):
+	async def on_message(self, message: Message) -> None:
 
 		# Omit reading the bot's own messages
 		if message.author == self.user:
@@ -61,73 +84,66 @@ class Bot(Client):
 		elif self.is_lit(message):
 			await self._lit(message)
 
-
-	def is_lit(self, message, thresh=5):
+	def is_lit(self, message: Message, thresh: int = 5) -> bool:
 		"""Detects if a given message contains 'lit'"""
 
 		# True if:
 		# 1. message length is less than thresh, and
 		# 2. message contains 'lit' separated by spaces
 		cap = len(message.content) < thresh
-		words = message.content.lower().split(' ')
+		words: List[str] = message.content.lower().split(' ')
 		return cap and (LIT in words)
 
-
-	async def _69(self, message):
+	async def _69(self, message: Message) -> None:
 		"""Send message in channel where '68' was found"""
 		await message.channel.send('69 😎')
 
-
-	async def _echo_back(self, message):
+	async def _echo_back(self, message: Message) -> None:
 		"""Echo back user's message"""
-		await message.channel.send('Message from `{.author}`: {.content}'.format(message))
+		formatted_message = 'Message from `{.author}`: {.content}'.format(message)
+		await message.channel.send(formatted_message)
 
-
-	async def _lit(self, message):
+	async def _lit(self, message: Message) -> None:
 		"""React with fire emoji and reply '^'"""
 
-		emoji_exists = False
-
 		# KORARU's server
-		moving_fire1 = utils.get(message.guild.emojis, name='fueguito')
-		if moving_fire1:
+		moving_fire1: Optional[Emoji] = utils.get(message.guild.emojis, name='fueguito')
+		if moving_fire1 is not None:
 			await message.add_reaction(moving_fire1)
-			emoji_exists = True
+			await message.channel.send('^')
+			return
 
 		# PilonSmash's server
-		moving_fire2 = utils.get(message.guild.emojis, name='lit')
-		if moving_fire2 and not emoji_exists:
+		moving_fire2: Optional[Emoji] = utils.get(message.guild.emojis, name='lit')
+		if moving_fire2 is not None:
 			await message.add_reaction(moving_fire2)
-			emoji_exists = True
+			await message.channel.send('^')
+			return
 
 		# Default Case
-		if not emoji_exists:
-			await message.add_reaction('🔥')
-
+		await message.add_reaction('🔥')
 		await message.channel.send('^')
 
-
-	async def _wave(self, message):
+	async def _wave(self, message: Message) -> None:
 		"""Blush on wave response or roll eyes if no wave"""
 
 		channel = message.channel
 		await channel.send('Care to wave at me? 😮')
 
-		def check(m):
+		def check(m: Message) -> bool:
 			return m.content.count('👋') and m.channel == channel
 
 		try:
-			msg = await self.wait_for('message', check=check, timeout=15.0)
+			await self.wait_for('message', check=check, timeout=15.0)
 		except TimeoutError:
 			await channel.send('🙄👎') # change to a reply or a reaction?
 		else:
 			await channel.send('☺️') # change to a reply or a reaction?
 
-
-	async def _uwu(self, message):
+	async def _uwu(self, message: Message) -> None:
 		"""UWUify the given message"""
 
-		arg = message.content.split(UWU)[1].strip()
+		arg: str = message.content.split(UWU)[1].strip()
 		sh = StringHandler(arg=UWU, signature=UWU_SIGNATURE)
 
 		# Help section
@@ -136,7 +152,7 @@ class Bot(Client):
 		elif message.content == UWU:
 			return await message.channel.send(sh.confused_text())
 
-		def uwuify_sentence(sentence):
+		def uwuify_sentence(sentence: str) -> str:
 			# Note: 
 			# * Exclamation point includes kaomojis
 			# * Parenthesis includes sparkles + kaomojis
@@ -151,13 +167,16 @@ class Bot(Client):
 		text = uwuify_sentence(arg)
 		await message.channel.send(text)
 
-
-	async def _piru(self, message):
+	async def _piru(self, message: Message) -> None:
 		"""Reply with cat ASCII art"""
 
-		arg = message.content.split(PIRU)[1].strip()
-		sh = StringHandler(arg=PIRU, signature=PIRU_SIGNATURE,
-						actions=PIRU_ACTIONS, parameter=arg)
+		arg: str = message.content.split(PIRU)[1].strip()
+		sh = StringHandler(
+			arg=PIRU,
+			signature=PIRU_SIGNATURE,
+			actions=PIRU_ACTIONS,
+			parameter=arg,
+		)
 		
 		# Help section
 		if arg == 'help':
@@ -171,13 +190,16 @@ class Bot(Client):
 		else:
 			return await message.channel.send(sh.oops_text())
 
-
-	async def _rekt(self, message):
+	async def _rekt(self, message: Message) -> None:
 		"""Send REKT image"""
 
-		arg = message.content.split(REKT)[1].strip()
-		sh = StringHandler(arg=REKT, signature=REKT_SIGNATURE,
-						actions=REKT_ACTIONS, parameter=arg)
+		arg: str = message.content.split(REKT)[1].strip()
+		sh = StringHandler(
+			arg=REKT,
+			signature=REKT_SIGNATURE,
+			actions=REKT_ACTIONS,
+			parameter=arg,
+		)
 
 		# Help section
 		if arg == 'help':
@@ -198,13 +220,16 @@ class Bot(Client):
 			picture = File(f, spoiler=False)
 			await message.channel.send(file=picture)
 
-
-	async def _calendar(self, message):
+	async def _calendar(self, message: Message) -> None:
 		"""Reply with calendar details"""
 
-		arg = message.content.split(CAL)[1].strip()
-		sh = StringHandler(arg=CAL, signature=CAL_SIGNATURE,
-						actions=CAL_ACTIONS, parameter=arg)
+		arg: str = message.content.split(CAL)[1].strip()
+		sh = StringHandler(
+			arg=CAL,
+			signature=CAL_SIGNATURE,
+			actions=CAL_ACTIONS,
+			parameter=arg,
+		)
 
 		# Help section
 		if arg == 'help':
@@ -225,4 +250,3 @@ class Bot(Client):
 			return await message.channel.send(f'```{calendar_string}```')
 		else:
 			return await message.channel.send(sh.oops_text())
-
