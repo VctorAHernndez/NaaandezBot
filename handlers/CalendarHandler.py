@@ -21,12 +21,14 @@ from googleapiclient.discovery import Resource
 class CalendarHandler:
 	SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
-	def __init__(self, app_credentials: str, user_token_file: str) -> None:
-		self.USER_TOKEN_FILE = user_token_file
-		self.APP_CREDENTIALS = app_credentials
+	def __init__(
+		self,
+		path_to_app_credentials_file: str,
+		path_to_user_token_file: str,
+	) -> None:
+		self.USER_TOKEN_FILE = path_to_user_token_file
+		self.APP_CREDENTIALS = path_to_app_credentials_file
 		self.service: Optional[Resource] = None
-		self.SCOPES = CalendarHandler.SCOPES
-
 
 	def authenticate(self) -> None:
 		creds: Optional[Credentials] = None
@@ -50,7 +52,6 @@ class CalendarHandler:
 				pickle.dump(creds, token)
 
 		self.service = build('calendar', 'v3', credentials=creds)
-
 
 	def fetch_month_events(self) -> List[Dict[str, Dict[str, Any]]]:
 
@@ -84,7 +85,6 @@ class CalendarHandler:
 
 		return events
 
-
 	def list_events(
 		self,
 		events: List[Dict[str, Dict[str, Any]]],
@@ -117,12 +117,10 @@ class CalendarHandler:
 
 		return string
 
-
 	def get_event_list(self) -> str:
 		"""Returns list-formatted events."""
 		events = self.fetch_month_events()
 		return self.list_events(events)
-
 
 	def get_calendar(
 		self,
